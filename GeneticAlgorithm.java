@@ -1,10 +1,11 @@
-import java.util.Map;
+import java.util.ArrayList;
 
 public class GeneticAlgorithm {
 
-	///// ATTRIBUTES /////
+    ///// ATTRIBUTES /////
 
-    private Map<Double[],Double> population;
+    private ArrayList<Individual> population;
+    private double[] fitnesses;
     private int chromosomeLength;
     private int populationSize;
     private double percentChild = 0.6;
@@ -18,6 +19,7 @@ public class GeneticAlgorithm {
 
     	populationSize = popSize;
     	chromosomeLength = chrmLen;
+        fitnesses = new double[populationSize];
     }
 
     ///// METHODS /////
