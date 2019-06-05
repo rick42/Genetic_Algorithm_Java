@@ -71,7 +71,7 @@ public class GeneticAlgorithm {
     * mutate randomly chooses a gene in chromosome and chooses a new random value
     * for that gene.  The resulting chromosome is returned.
     */
-    public double[] mutate(double[] chromosome)
+    private double[] mutate(double[] chromosome)
     {
     	// TODO: Write this method
     	Random rand = new Random();
