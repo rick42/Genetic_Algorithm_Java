@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Random;
+
 
 public class GeneticAlgorithm {
 
@@ -10,6 +12,8 @@ public class GeneticAlgorithm {
     private int populationSize;
     private double percentChild = 0.6;
     private double percentMutate = 0.1;
+    private double geneRange = 200.0;
+    private double geneOffset = -100.0;
     
     ///// CONSTRUCTOR /////
 
@@ -70,7 +74,10 @@ public class GeneticAlgorithm {
     private double[] mutate(double[] chromosome)
     {
     	// TODO: Write this method
+    	Random rand = new Random();
+    	int randomGene = rand.nextInt(chromosomeLength);
+    	chromosome[randomGene] = (rand.nextDouble() * geneRange) + geneOffset;
 
-    	return new double[0];
+    	return chromosome;
     }
 }
