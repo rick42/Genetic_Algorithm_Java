@@ -61,7 +61,7 @@ public class GeneticAlgorithm {
     * will occur in the children specified by attribute percentMutate. Returns 
     * two children.
     */
-    public double[][] crossOver(double[] parent1, double[] parent2)
+    private double[][] crossOver(double[] parent1, double[] parent2)
     {
         Random rand = new Random();
         
