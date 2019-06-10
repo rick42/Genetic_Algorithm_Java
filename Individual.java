@@ -2,10 +2,10 @@ public class Individual{
     private double[] chromosome;
     private double fitness;
 
-    public Individual(double[] chrom, double fit)
+    public Individual(double[] chrom, FitnessFunction fitfunc)
     {
         chromosome = chrom;
-        fitness = fit;
+        fitness = fitfunc.calculateFitness(chrom);
     }
 
     public double[] getChromosome(){return chromosome;}

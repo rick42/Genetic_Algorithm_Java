@@ -7,23 +7,23 @@ public class GeneticAlgorithm {
     ///// ATTRIBUTES /////
 
     private ArrayList<Individual> population;
-    private double[] fitnesses;
     private int chromosomeLength;
     private int populationSize;
     private double percentChild = 0.6;
     private double percentMutate = 0.1;
     private double geneRange = 200.0;
     private double geneOffset = -100.0;
+    private FitnessFunction fitnessFunction;
     
     ///// CONSTRUCTOR /////
 
-    public GeneticAlgorithm(int popSize, int chrmLen)
+    public GeneticAlgorithm(int popSize, int chrmLen, FitnessFunction fitFunc)
     {
     	// TODO: Complete this constructor
 
     	populationSize = popSize;
     	chromosomeLength = chrmLen;
-        fitnesses = new double[populationSize];
+        fitnessFunction = fitFunc;
     }
 
     ///// METHODS /////
