@@ -11,6 +11,7 @@ public class Individual{
     public double[] getChromosome(){return chromosome;}
     public double getFitness(){return fitness;}
 
+
     public static int cmpFitness(Individual ind1, Individual ind2)
     {
         if(ind1.getFitness() < ind2.getFitness())

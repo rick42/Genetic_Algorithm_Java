@@ -11,6 +11,7 @@
 *.o
 *.so
 Main.java
+SortFunctions.java
 *.so
 
 # Packages #
