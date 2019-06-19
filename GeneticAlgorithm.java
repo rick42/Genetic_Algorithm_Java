@@ -8,22 +8,22 @@ public class GeneticAlgorithm {
     ///// ATTRIBUTES /////
 
     public ArrayList<Individual> population;
+    private String[] geneDataType;
     private int chromosomeLength;
     private int populationSize;
-    private double percentChild = 0.6;
-    private double percentMutate = 0.1;
-    private double geneRange = 200.0;
-    private double geneOffset = -100.0;
+    private double percentChild;
+    private double [] geneRange;
+    private double [] geneOffset;
+    private double percentMutate;
     private FitnessFunction fitnessFunction;
     private String fitnessPriority;
-    private int currentGeneration = 0;
     Random rand = new Random(System.nanoTime());
     private long seed = System.currentTimeMillis();
 
 
     ///// CONSTRUCTOR /////
 
-    public GeneticAlgorithm(int popSize, int chrmLen, FitnessFunction fitFunc)
+    public GeneticAlgorithm(int popSize, int chrmLen, String [] chrmDT, FitnessFunction fitFunc, double [] minGeneValue, double [] maxGeneValue, double chldPrcnt, double mttPrcnt, String fitPrio)
     {
     	// TODO: Complete this constructor
     	
@@ -31,7 +31,22 @@ public class GeneticAlgorithm {
     	populationSize = popSize;
     	chromosomeLength = chrmLen;
         fitnessFunction = fitFunc;
-        fitnessPriority = "maximize";
+        percentMutate = mttPrcnt;
+        percentChild = chldPrcnt;
+        geneDataType = new String [chromosomeLength];
+        geneRange = new double [chromosomeLength];
+        geneOffset = new double [chromosomeLength];
+        
+        for (int i = 0; i < chromosomeLength; i++)
+        {
+            geneDataType[i] = chrmDT[i];
+            geneRange[i] = (maxGeneValue[i] - minGeneValue[i]);
+            geneOffset[i] = minGeneValue[i];
+        
+        }
+       // geneRange = (maxGeneValue - minGeneValue);
+       // geneOffset = (minGeneValue);
+        fitnessPriority = fitPrio;
         initializePopulation();
 
     }
@@ -41,19 +56,21 @@ public class GeneticAlgorithm {
     /** 
     * initializes the private variable population with random values
     */
-    public void initializePopulation()
+    private void initializePopulation()
     {
     	// TODO: Write this method
-    	double[] tempChrome = new double [chromosomeLength];
+    	double[] tempChrome;
+    	double[] tempChrome2 = new double [chromosomeLength];
     	int check= 1;
     	System.out.println("\nFitness:\n");
     	for (int i = 0; i < populationSize; i++)
     	{
+            tempChrome = new double [chromosomeLength];
             for (int j = 0; j < chromosomeLength; j++)
             {   
-               // seed=seed+1001;
-                tempChrome[j]= getGene();
-                seed=seed+1002;
+                seed=seed+getInt(1001);
+                tempChrome[j]= getGene(j);
+                seed=seed+getInt(1002);
                 //System.out.printf("%2.10f\n ",tempChrome[j]);
 
             }
@@ -61,7 +78,9 @@ public class GeneticAlgorithm {
             if (i == 0)
             {
                 population.add(new Individual(tempChrome,fitnessFunction));
-                System.out.println(population.get(i).getFitness());
+                //System.out.printf("%2.10f\n ",tempChrome[0]);
+
+                //System.out.println(population.get(i).getFitness());
             }
             else
             {
@@ -72,14 +91,25 @@ public class GeneticAlgorithm {
             
             if ((i > 0) && (check == 0)) 
             {
+                //tempChrome2 = population.get(i-1).getChromosome();
+                //System.out.printf("\nthis is i-1 %2.10f\n ",tempChrome2[0]);
                 population.add(new Individual(tempChrome,fitnessFunction));
-                System.out.println(population.get(i).getFitness());
+                //tempChrome = population.get(i).getChromosome();
+                //System.out.printf("this is i %2.10f\n ",tempChrome[0]);
+                //System.out.println(population.get(i).getFitness()[0]);
+
+
             }
             else if (i != 0)    
             {   
                 System.out.println("bad");
                 i--;
             }
+    	}
+    	for (int k = 0; k < populationSize; k++)
+    	{
+            population.get(k).printChromosome();
+    	
     	}
     	sortPopulation();
     }
@@ -90,11 +120,33 @@ public class GeneticAlgorithm {
     private void nextGeneration()
     {
     	// TODO: Write this method
-        double [][] parents = new double [2][chromosomeLength];
-        double [][] children = new double [2][chromosomeLength];
-
-        parents = createMatingPool();
-        children = crossOver(parents[0] ,parents[1]);
+        double [][] parents;
+        double [][] children;
+        int newGeneration = (int)(percentChild * populationSize);
+        int maxPop = newGeneration + populationSize;
+        
+        while (population.size() < maxPop)
+        {
+            parents = new double [2][chromosomeLength];
+            children = new double [2][chromosomeLength];
+            parents = createMatingPool();
+            children = crossOver(parents[0] ,parents[1]);
+            
+            if ( (population.size() < maxPop) && (findChromosome(population,children[0]) == 0 ) )
+            {
+                population.add(new Individual(children[0], fitnessFunction));
+            }
+            if ( (population.size() < maxPop) && (findChromosome(population,children[1]) == 0 ) )
+            {
+                population.add(new Individual(children[1], fitnessFunction));
+            }
+        }
+        sortPopulation();
+        
+        for (int i = maxPop-1; i >= populationSize; i--)
+        {
+            population.remove(i);
+        }
     }
 
     /**
@@ -104,6 +156,11 @@ public class GeneticAlgorithm {
     public void train(int maxGenerations)
     {
     	// TODO: Write this method
+    	for ( int i = 0; i < maxGenerations; i++)
+    	{
+            nextGeneration();
+            //System.out.printf("this is Generation %d\n ",i+1);
+        }
     	
     }
     
@@ -112,7 +169,7 @@ public class GeneticAlgorithm {
     *
     */
     
-    public double[][] createMatingPool()
+    private double[][] createMatingPool()
     {
     	
         final int poolSize = population.size();
@@ -158,15 +215,18 @@ public class GeneticAlgorithm {
         
         int crossOverPoint;   //point where child will split parent 1 and parent 2
         double[][] children = new double [2][chromosomeLength]; // two dimentional array for two children
+        double mutationBonusMultiplier = 5; 
+        double mutationCheck = percentMutate;
 
     	if (chromosomeLength >2)
     	{
              crossOverPoint = getInt(chromosomeLength-2)+1;
-             seed=seed+1005;
+             seed=seed+getInt(1005);
         }
         else
         {
             crossOverPoint = 1;
+            mutationCheck = (mutationBonusMultiplier * percentMutate);
         }
     	
     	for (int i=0; i < chromosomeLength; i++)
@@ -185,16 +245,16 @@ public class GeneticAlgorithm {
         }
         
         
-        if (getDouble() <= percentMutate)
+        if (getDouble() <= mutationCheck)
         {
             mutate(children[0]);
-            seed+=1009;
+            seed+=getInt(1009);
         }
         else{}
-        if (getDouble() <= percentMutate)
+        if (getDouble() <= mutationCheck)
         {
             mutate(children[1]);
-            seed+=1010;
+            seed+=getInt(1010);
         }
         else{}
 
@@ -209,7 +269,7 @@ public class GeneticAlgorithm {
     {
         rand.setSeed(seed);
         int randomGene = rand.nextInt(chromosomeLength);
-    	chromosome[randomGene] = (rand.nextDouble() * geneRange) + geneOffset;
+    	chromosome[randomGene] = (rand.nextDouble() * geneRange[randomGene]) + geneOffset[randomGene];
 
     	return chromosome;
     }
@@ -238,7 +298,7 @@ public class GeneticAlgorithm {
                 {
                     check = 1;
                     //.out.println("bad1");
-                    System.out.printf("%2.10f %2.10f",popChromosome[j],chromosome[j]);
+                    ///System.out.printf("%2.10f %2.10f",popChromosome[j],chromosome[j]);
 
                     i = currentPopulationSize;  //breaks out of i loop
                     
@@ -254,7 +314,7 @@ public class GeneticAlgorithm {
     * sort population according to fitness priority to maximize, or minimize
     * fitness value.
     */
-    public void sortPopulation()
+    private void sortPopulation()
     {
 
         if (fitnessPriority == "minimize")
@@ -317,7 +377,7 @@ public class GeneticAlgorithm {
 
         }
         //System.out.println(parent);
-        System.out.printf("\n%2.2f %2.2f\n",leftChild,rightChild);
+        //System.out.printf("\n%2.2f %2.2f\n",leftChild,rightChild);
 
     }
 
@@ -335,7 +395,7 @@ public class GeneticAlgorithm {
 
     }
     
-    public void buildHeap(ArrayList<Individual> arr)
+    private void buildHeap(ArrayList<Individual> arr)
     {
         final int listEnd = arr.size();
         int i;
@@ -353,7 +413,7 @@ public class GeneticAlgorithm {
         
     }
     
-    public void sortHeap(ArrayList<Individual> arr ) 
+    private void sortHeap(ArrayList<Individual> arr ) 
     {   
         buildHeap(arr);
         final int listEnd = arr.size();
@@ -393,7 +453,7 @@ public class GeneticAlgorithm {
         }
         
     }
-    public void reverseSortHeap(ArrayList<Individual> arr)
+    private void reverseSortHeap(ArrayList<Individual> arr)
     {   
         buildHeap(arr);
         sortHeap(arr);
@@ -419,12 +479,12 @@ public class GeneticAlgorithm {
         return duece;
     }
     
-    private double getGene()
+    private double getGene(int i)
     {
         double gene;
         rand.setSeed(seed);
 
-        gene = (rand.nextDouble() * geneRange) + geneOffset;
+        gene = (rand.nextDouble() * geneRange[i]) + geneOffset[i];
         
         return gene;
     }

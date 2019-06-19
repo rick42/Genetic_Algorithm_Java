@@ -27,4 +27,17 @@ public class Individual{
             return 0;
         }
     }
+    public void printChromosome()
+    {
+        int length = chromosome.length  ;
+        
+        for ( int i = 0; i < length; i++)
+        {
+            System.out.println(chromosome[i]);
+        
+        }
+    
+    
+    
+    }
 }
